@@ -41,7 +41,6 @@ bool Post(const std::string &url, const std::string &data, std::string &response
     return (res == CURLE_OK);
 }
 
-// https://openapi.alipan.com/oauth/access_toke?client_id=xxxxxx&client_secret=xxxxx&grant_type=authorization_code&code=xxx
 class CurlRequest : public Task
 {
 public:
