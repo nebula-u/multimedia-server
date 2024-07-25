@@ -1,3 +1,6 @@
+#ifndef THREADPOOL_H
+#define THREADPOOL_H
+
 #include <vector>
 #include <queue>
 #include <memory>
@@ -176,3 +179,5 @@ private:
 
     PoolMode poolMode_; // 当前线程池的工作模式
 };
+
+#endif

@@ -5,104 +5,59 @@
 #include <curl/curl.h>
 #include "threadpool.h"
 #include "json.h"
+#include "common.h"
+#include "CurlRequest.h"
 
-typedef struct
+/******************全局变量******************/
+Config config;
+
+
+/******************函数声明******************/
+RETURN_CODE initializeConfig();
+void initializeApp();
+
+
+/**
+ * 功能：完成服务的初始化
+ * 作者：Nebulau
+ * 日期：2024年7月25日
+ * 修改历史：
+ *      - 2024年7月25日：增加配置文件加载功能
+ */
+void initializeApp()
 {
-    std::string appid = "";
-    std::string appsecrete = "";
-    std::string code = "";
-    std::string grant_type = "";
-} Config;
-
-Config config = {""};
-
-size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp)
-{
-    ((std::string *)userp)->append((char *)contents, size * nmemb);
-    return size * nmemb;
+    initializeConfig();
 }
 
-bool Post(const std::string &url, const std::string &data, std::string &response)
-{
-    CURL *curl;
-    curl_global_init(CURL_GLOBAL_DEFAULT);
-    curl = curl_easy_init();
-    // 设置请求参数
-    struct curl_slist *header_list = NULL;
-    header_list = curl_slist_append(header_list, "Content-Type: application/json; charset=UTF-8");
-    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, header_list);
-    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-    curl_easy_setopt(curl, CURLOPT_POST, 1L);
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data.c_str());
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &WriteCallback);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
-
-    CURLcode res = curl_easy_perform(curl);
-    return (res == CURLE_OK);
-}
-
-class CurlRequest : public Task
-{
-public:
-    Any run()
-    {
-        {
-            /******************API******************/
-            std::string url = "https://openapi.alipan.com/oauth/access_token";
-
-            
-            /******************JSON******************
-             * {   
-             *  "client_id": "123456",    
-             *  "client_secret": "123456",     
-             *  "grant_type": "authorization_code",   
-             *  "code": "2567ff3a817b438185b61a5e52ccfc8b"
-             * }
-             ****************************************/
-            std::string data = "{\"client_id\": \""
-                             + config.appid
-                             + "\", \"client_secret\": \""
-                             + config.appsecrete
-                             + "\", \"grant_type\": \""
-                             + config.grant_type
-                             + "\", \"code\": \""
-                             + config.code
-                             + "\"}";
-            std::cout << data << std::endl;
-            std::string response = "";
-            if (Post(url, data, response))
-            {
-                std::cout << response << std::endl;
-            }
-            else
-            {
-                std::cerr << "post error" << std::endl;
-            }
-        }
-
-        return 0;
-    }
-};
-
-int main()
+/**
+ * 功能：加载配置文件
+ * 作者：Nebulau
+ * 日期：2024年7月25日
+ * 修改历史：
+ *      - 2024年7月25日：读取json配置文件，做json解析，然后将配置保存在 config 中
+ * 
+ */
+RETURN_CODE initializeConfig()
 {
     std::ifstream fconfig;
     fconfig.open("../private/config.json");
     Json::Reader reader;
+    Json::FastWriter writer;
     Json::Value root;
-    if (!reader.parse(fconfig, root, false))
+    if (reader.parse(fconfig, root, false))
     {
-        std::cerr << "配置加载出错，程序将退出" << std::endl;
-        return 1;
+        config.client_id = root["client_id"].asString();
+        config.client_secret = root["client_secret"].asString();
+        std::cerr << "配置文件加载成功" << std::endl;
+        return RETURN_CODE::NO_ERROR;
     }
+    std::cerr << "配置文件加载失败" << std::endl;
+    return RETURN_CODE::LOAD_CONFIG_ERROR;
+}
 
-    std::cout << root["appid"].asString() << std::endl;
-    std::cout << root["appsecrete"].asString() << std::endl;
-    config.appid = root["appid"].asString();
-    config.appsecrete = root["appsecrete"].asString();
-    config.grant_type = root["grant_type"].asString();
-    config.code = root["code"].asString();
-
+int main()
+{
+    initializeApp();
     ThreadPool *pool = new ThreadPool();
     pool->start(1);
     pool->submitTask(std::make_shared<CurlRequest>());
