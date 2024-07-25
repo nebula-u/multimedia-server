@@ -43,8 +43,6 @@ int main()
     pool->start(6);
     pool->submitTask(std::make_shared<CurlRequest>());
 
-    // CURL *curl = nullptr;
-    // std::cout << curl << std::endl;
     getchar();
     return 0;
 }
