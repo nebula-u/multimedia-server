@@ -3,10 +3,12 @@ set(CMAKE_CXX_STANDARD 17)
 project(multimedia-server)
 
 include_directories(./include)
+include_directories(./plugin/jsoncpp/json)
 
 aux_source_directory(./src DIR_SRCS_MAIN)
+aux_source_directory(./plugin/jsoncpp DIR_SRCS_JSON)
 
-add_executable(server ${DIR_SRCS_MAIN})
+add_executable(server ${DIR_SRCS_MAIN} ${DIR_SRCS_JSON})
 
 # 添加pthread库
 find_package(Threads REQUIRED)
