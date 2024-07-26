@@ -4,11 +4,13 @@ project(multimedia-server)
 
 include_directories(./include)
 include_directories(./plugin/jsoncpp/json)
+include_directories((./plugin/threadpool))
 
 aux_source_directory(./src DIR_SRCS_MAIN)
 aux_source_directory(./plugin/jsoncpp DIR_SRCS_JSON)
+aux_source_directory(./plugin/threadpool DIR_SRCS_THREADPOOL)
 
-add_executable(server ${DIR_SRCS_MAIN} ${DIR_SRCS_JSON})
+add_executable(server ${DIR_SRCS_MAIN} ${DIR_SRCS_JSON} ${DIR_SRCS_THREADPOOL})
 
 # 添加pthread库
 find_package(Threads REQUIRED)

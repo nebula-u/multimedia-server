@@ -2,7 +2,10 @@
 #define COMMMON_H
 
 #include <string>
-
+#include <fstream>
+#include <iostream>
+#include <vector>
+#include <curl/curl.h>
 
 /*********************收发短消息缓存大小*********************/
 #define BUFFER_SIZE 1024
@@ -15,7 +18,9 @@ enum class RETURN_CODE
     LOAD_CONFIG_ERROR,          // 配置文件加载失败
     GET_LOGIN_QR_SID_ERROR,     // 获取登录二维码 {sid} 失败
     GET_LOGIN_QR_ERROR,         // 获取登录二维码失败
+    QR_EXPIRED,                 // 登录二维码过期
     GET_ACCESS_TOKEN_ERROR,     // 获取access_token失败
+    REFRESH_ACCESS_TOKEN_ERROR, // 刷新sccess_token失败
 };
 
 

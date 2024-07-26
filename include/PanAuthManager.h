@@ -1,33 +1,32 @@
-#ifndef CURLREQUEST_H
-#define CURLREQUEST_H
+#ifndef PANAUTHMANAGER_H
+#define PANAUTHMANAGER_H
 
+#include <unistd.h>
 #include <curl/curl.h>
 #include "threadpool.h"
 #include "json.h"
 #include "global.h"
 
-size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp)
-{
-    ((std::string *)userp)->append((char *)contents, size * nmemb);
-    return size * nmemb;
-}
-
-size_t WriteCallbackImg(void* contents, size_t size, size_t nmemb, void* userp) {
-    // 这里可以将接收到的数据写入文件或处理内存缓冲区
-    std::cout << "开始写入二维码" << std::endl;
-    size_t written = fwrite(contents, size, nmemb, static_cast<FILE*>(userp));
-    return written;
-}
-
-class CurlRequest : public Task
+class PanAuthManager : public Task
 {
 public:
     Any run()
     {
-        GetAuthQRCodeSid();
-        GetAuthQRCode();
-        GetQRCodeLoginStatus();
-        GetAccessToken();
+        while (true)
+        {
+            //这里提醒用户需要授权 
+            GetAuthQRCodeSid();
+            GetAuthQRCode();
+            WaitForLogin();
+            GetAccessToken();
+            while (true)
+            {
+                sleep(7000);
+                std::cout << "即将刷新access_token" << std::endl;
+                if(RETURN_CODE::NO_ERROR != RefreshAccessToken()) break;
+                std::cout << "access_token刷新成功" << std::endl;
+            }
+        }
         return 0;
     }
 
@@ -46,7 +45,9 @@ private:
      *      - false：请求失败
      * 修改历史：
      *      - 2024年7月25日：创建函数
+     *      - 2024年7月26日：该函数已经废弃，替代函数见 common.h 中Post函数
      */
+#if 0
     bool Post(const std::string &url, const std::string &data, std::string &response)
     {
         curl_global_init(CURL_GLOBAL_DEFAULT);
@@ -65,7 +66,9 @@ private:
         curl_easy_cleanup(curl_);
         return (res == CURLE_OK);
     }
+#endif
 
+#if 0
     bool Get(const std::string& url, FILE* fp) {
         curl_global_init(CURL_GLOBAL_DEFAULT);
         curl_ = curl_easy_init();
@@ -79,7 +82,9 @@ private:
         curl_easy_cleanup(curl_);
         return (res == CURLE_OK);
     }
+#endif
 
+#if 0
     bool Get(const std::string& url, std::string &response) {
         curl_global_init(CURL_GLOBAL_DEFAULT);
         curl_ = curl_easy_init();
@@ -93,6 +98,7 @@ private:
         curl_easy_cleanup(curl_);
         return (res == CURLE_OK);
     }
+#endif
 
     RETURN_CODE GetAuthQRCodeSid()
     {
@@ -120,12 +126,16 @@ private:
         root["scopes"].append("album:shared:read");     // 读取共享相薄文件
         root["width"] = 400;
         root["height"] = 400;
-        std::string data = sw.write(root);
-        std::cout << data << std::endl;
+        std::string json = sw.write(root);
+        std::cout << json << std::endl;
+        /****************HEAD LIST***************/
+        std::vector<std::string> headers = {
+            "Content-Type: application/json"
+        };
 
         /******************响应******************/
         std::string response = "";
-        if (Post(url, data, response))
+        if (Post(url, json, headers, response, WriteTextCallback))
         {
             Json::Reader reader;
             Json::Value root;
@@ -137,7 +147,7 @@ private:
         }
         else
         {
-            std::cerr << "获取登录二维码 {sid} 请求失败" << std::endl;
+            std::cerr << "获取登录二维码 {sid} 的请求失败" << std::endl;
         }
         return RETURN_CODE::GET_LOGIN_QR_SID_ERROR;
     }
@@ -148,11 +158,16 @@ private:
         std::string url = this->qrCodeUrl_;
 
         /************QRCode-response************/
-        FILE* fp = fopen("../QRCode.jpg", "wb");
+        // FILE* fp = fopen("../QRCode.jpg", "wb");
+        std::string response = "";
+
+        /****************HEAD LIST***************/
+        std::vector<std::string> headers = {};
+
+        std::string json = "";
         
-        if(Get(url, fp))
+        if(Get(url, json, headers, response, WriteBinaryCallback, "../QRCode.jpg"))
         {
-            fclose(fp);
             std::cout << "登录二维码请求成功" << std::endl;
             return RETURN_CODE::NO_ERROR;
         }
@@ -163,24 +178,57 @@ private:
         return RETURN_CODE::GET_LOGIN_QR_ERROR;
     }
 
-    RETURN_CODE GetQRCodeLoginStatus()
+    /**
+     * 功能：获取到登录二维码之后，等待用户登录
+     * 作者：Nebulau
+     * 日期：2024年7月26日
+     * 更改历史：
+     *      - 2024年7月26日：每隔一秒钟调用一次Get方法，更新登录状态
+     *      - 2024年7月26日：修改函数名为WaitForLogin，
+     */
+    RETURN_CODE WaitForLogin()
     {
-        // API： GET 域名 + /oauth/qrcode/{sid}/status
         std::string url = "https://openapi.alipan.com/oauth/qrcode/" + this->sid_ + "/status";
         std::string response = "";
         std::string QRLoginStatus="";
-        while ("LoginSuccess" != QRLoginStatus)
+        std::string json = "";
+
+        /****************HEAD LIST***************/
+        std::vector<std::string> headers = {};
+
+        // 二维码有效时间为3分钟，即180秒
+        for(int i = 0; i < 180; i++)
         {
             response = "";
-            if(Get(url, response))
+            if(Get(url, json, headers, response, WriteTextCallback))
             {
                 Json::Reader reader;
                 Json::Value root;
                 reader.parse(response, root);
                 QRLoginStatus = root["status"].asString();
                 this->authCode_ = root["authCode"].asString();
-                std::cout << "登陆状态为：" << QRLoginStatus << std::endl;
-                std::cout << response << std::endl;
+                if("LoginSuccess" == QRLoginStatus)
+                {
+                    std::cout << "登录成功" << std::endl;
+                    return RETURN_CODE::NO_ERROR;
+                }
+                else if("WaitLogin" == QRLoginStatus)
+                {
+                    std::cout << "等待登录" << std::endl;
+                }
+                else if("ScanSuccess" == QRLoginStatus)
+                {
+                    std::cout << "扫码成功" << std::endl;
+                }
+                else if("QRCodeExpired" == QRLoginStatus)
+                {
+                    std::cout << "二维码过期" << std::endl;
+                    break;
+                }
+                else
+                {
+                    std::cerr << "未知的登录状态：" << QRLoginStatus << std::endl;
+                }
             }
             else
             {
@@ -188,9 +236,16 @@ private:
             }
             sleep(1);
         }
-        return RETURN_CODE::NO_ERROR;
+        return RETURN_CODE::QR_EXPIRED;
     }
 
+    /**
+     * 功能：获取access_token
+     * 作者：Nebulau
+     * 日期：2024年7月26日
+     * 更改历史：
+     *      - 2024年7月26日：调用Post方法，获取access_token，将access_token保存进类成员access_token_中
+     */
     RETURN_CODE GetAccessToken()
     {
         /******************API******************/
@@ -210,32 +265,98 @@ private:
         root["client_secret"] = config.client_secret;
         root["grant_type"] = "authorization_code";
         root["code"] = this->authCode_;
-        std::string data = sw.write(root);
+        std::string json = sw.write(root);
+        std::string token_type="";
+
+        /****************HEAD LIST***************/
+        std::vector<std::string> headers = {
+            "Content-Type: application/json"
+        };
 
         /******************响应******************/
         std::string response = "";
-        if (Post(url, data, response))
+        if (Post(url, json, headers, response, WriteTextCallback))
         {
             Json::Reader reader;
             Json::Value root;
             reader.parse(response, root);
-            this->access_token_ = root["access_token"].asString();
-            std::cout << "access_token: " << this->access_token_ << std::endl;
-            return RETURN_CODE::NO_ERROR;
+            token_type=root["token_type"].asString();
+            if("Bearer" == token_type)
+            {
+                sharedVariable.setAccessToken(root["access_token"].asString());
+                sharedVariable.setRefreshToken(root["refresh_token"].asString());
+                return RETURN_CODE::NO_ERROR;
+            }
+            else
+            {
+                std::cout << response << std::endl;
+                std::cerr << "GetAccessToken Error: " << token_type << std::endl;
+            }
         }
         else
         {
-            std::cerr << "请求失败" << std::endl;
+            std::cerr << "获取access_token的请求失败" << std::endl;
         }
         return RETURN_CODE::GET_ACCESS_TOKEN_ERROR;
     }
 
+    RETURN_CODE RefreshAccessToken()
+    {
+        /******************API******************/
+        std::string url = "https://openapi.alipan.com/oauth/access_token";
+
+        /******************JSON******************
+         * {
+         *      "client_id": "123456",
+         *      "client_secret": "123456",
+         *      "grant_type": "refresh_token",
+         *      "refresh_token": ""
+         * }
+         ****************************************/
+        Json::Value root;
+        Json::StyledWriter sw;
+        root["client_id"] = config.client_id;
+        root["client_secret"] = config.client_secret;
+        root["grant_type"] = "refresh_token";
+        root["refresh_token"] = sharedVariable.getRefreshToken();
+        std::string json = sw.write(root);
+        std::string token_type="";
+
+        /****************HEAD LIST***************/
+        std::vector<std::string> headers = {
+            "Content-Type: application/json; charset=UTF-8"
+        };
+
+        /******************响应******************/
+        std::string response = "";
+        if (Post(url, json, headers, response, WriteTextCallback))
+        {
+            Json::Reader reader;
+            Json::Value root;
+            reader.parse(response, root);
+            token_type=root["token_type"].asString();
+            if("Bearer" == token_type)
+            {
+                sharedVariable.setAccessToken(root["access_token"].asString());
+                sharedVariable.setRefreshToken(root["refresh_token"].asString());
+                return RETURN_CODE::NO_ERROR;
+            }
+            else
+            {
+                std::cerr << "RefreshAccessToken Error: " << token_type << std::endl;
+            }
+        }
+        else
+        {
+            std::cerr << "刷新access_token的请求失败" << std::endl;
+        }
+        return RETURN_CODE::REFRESH_ACCESS_TOKEN_ERROR;
+    }
+
 private:
-    CURL *curl_;
     std::string sid_;
     std::string qrCodeUrl_;
     std::string authCode_;
-    std::string access_token_;
 };
 
-#endif
+#endif  //PANAUTHMANAGER_H

@@ -1,15 +1,18 @@
 #include <iostream>
-#include <unistd.h>
 #include <fstream>
 #include <string>
 #include <curl/curl.h>
 #include "threadpool.h"
 #include "json.h"
 #include "common.h"
-#include "CurlRequest.h"
+#include "PanAuthManager.h"
+
+#include "FileServer.h"
 
 /******************全局变量******************/
 Config config;
+SharedVariable sharedVariable;
+CURL *curl;
 
 
 /******************函数声明******************/
@@ -59,8 +62,10 @@ int main()
 {
     initializeApp();
     ThreadPool *pool = new ThreadPool();
-    pool->start(1);
-    pool->submitTask(std::make_shared<CurlRequest>());
+    pool->start(2);
+    pool->submitTask(std::make_shared<PanAuthManager>());
+    pool->submitTask(std::make_shared<FileServer>());
+
 
     getchar();
     return 0;
