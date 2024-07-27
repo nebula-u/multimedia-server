@@ -5,15 +5,14 @@
 #include "threadpool.h"
 #include "json.h"
 #include "common.h"
-#include "PanAuthManager.h"
-
-#include "FileServer.h"
+#include "PanRequests.h"
+#include "Server.h"
 
 /******************全局变量******************/
 Config config;
 SharedVariable sharedVariable;
 CURL *curl;
-
+PanRequests requests;
 
 /******************函数声明******************/
 RETURN_CODE initializeConfig();
@@ -63,9 +62,7 @@ int main()
     initializeApp();
     ThreadPool *pool = new ThreadPool();
     pool->start(2);
-    pool->submitTask(std::make_shared<PanAuthManager>());
-    pool->submitTask(std::make_shared<FileServer>());
-
+    pool->submitTask(std::make_shared<Server>());
 
     getchar();
     return 0;
