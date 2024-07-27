@@ -14,6 +14,9 @@ private:
 
 private:
     int server_fd_;
+    struct sockaddr_in address_;
+    int addrlen_;
+    char buffer[BUFFER_SIZE];
 };
 
 #endif // RECEIVEMESSAGE_H
