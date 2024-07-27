@@ -9,7 +9,7 @@
 class Server : public Task
 {
 private:
-    RETURN_CODE GetUserInfo();
+    
 public:
     Any run();
 
