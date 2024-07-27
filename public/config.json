@@ -1,4 +1,5 @@
 {
     "client_id": "c405b25d5e6f43d384ca6bca8544b343",    
-    "client_secret": "3b8dffc5c9d046c4a35741b016cdf2de"
+    "client_secret": "3b8dffc5c9d046c4a35741b016cdf2de",
+    "server_port": "18080"
 }

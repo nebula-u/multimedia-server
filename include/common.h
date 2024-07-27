@@ -6,6 +6,7 @@
 #include <iostream>
 #include <vector>
 #include <curl/curl.h>
+#include <unistd.h>
 
 /*********************收发短消息缓存大小*********************/
 #define BUFFER_SIZE 1024
@@ -29,6 +30,7 @@ typedef struct
 {
     std::string client_id;
     std::string client_secret;
+    std::string server_port;
 } Config;
 
 #endif

@@ -14,7 +14,8 @@ public:
     Any run();
 
 private:
-    bool panAuthStatus_;    // 保存云盘授权状态 true=已获得授权 false=未获得授权
+    bool panAuthStatus_;    // 保存云盘授权状态（true=已获得授权 false=未获得授权）
+    
 };
 
 #endif  // SERVER_H

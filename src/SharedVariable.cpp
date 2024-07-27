@@ -1,5 +1,12 @@
 #include "SharedVariable.h"
 
+/**
+ * 功能：各个共享变量的互斥访问
+ * 注释：只是简单的互斥保护，使用轻锁 std::lock_guard 就行
+ * 作者：Nebualu
+ * 日期：2024年7月27日
+ */
+
 std::string SharedVariable::getAccessToken()
 {
     std::lock_guard<std::mutex> lock(mtxAccessToken_);

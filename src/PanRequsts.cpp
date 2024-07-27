@@ -2,7 +2,11 @@
 
 std::mutex mtxRequest;
 
-
+/**
+ * 功能：朴素的HTTP Get函数，需要指定url、json、head、response、回调函数、文件名（响应为二进制数据时填写），仅限类内部使用
+ * 作者：Nebulau
+ * 日期：2024年7月27日
+ */
 bool PanRequests::Get(const std::string &url, const std::string &json, 
           const std::vector<std::string>& headers, std::string &response, 
           size_t (*callback)(void*, size_t, size_t, void*), const std::string& fileName)
@@ -39,6 +43,11 @@ bool PanRequests::Get(const std::string &url, const std::string &json,
     return (res == CURLE_OK);
 }
 
+/**
+ * 功能：朴素的HTTP Post函数，需要指定url、json、head、response、回调函数，仅限类内部使用
+ * 作者：Nebulau
+ * 日期：2024年7月27日
+ */
 bool PanRequests::Post(const std::string &url, const std::string &json, 
           const std::vector<std::string>& headers, std::string &response, 
           size_t (*callback)(void*, size_t, size_t, void*))
@@ -324,7 +333,11 @@ RETURN_CODE PanRequests::RefreshAccessToken()
     return RETURN_CODE::REFRESH_ACCESS_TOKEN_ERROR;
 }
 
-
+/**
+ * 功能：获取用户信息，包括用户ID，昵称、头像等
+ * 作者：Nebualu
+ * 日期：2024年7月27日
+ */
 RETURN_CODE PanRequests::GetUserInfo()
 {
     std::string url = "https://openapi.alipan.com/oauth/users/info";

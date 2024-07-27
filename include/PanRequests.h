@@ -10,26 +10,6 @@
 
 class PanRequests
 {
-#if 0
-public:
-    Any run()
-    {
-        while (true)
-        {
-            //这里提醒用户需要授权 
-            GetAuthQRCodeSid();
-            GetAuthQRCode();
-            WaitForLogin();
-            GetAccessToken();
-            while (true)
-            {
-                sleep(7000);
-                if(RETURN_CODE::NO_ERROR != RefreshAccessToken()) break;
-            }
-        }
-        return 0;
-    }
-#endif
 public:
 
     RETURN_CODE GetAuthQRCodeSid();

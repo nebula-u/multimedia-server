@@ -7,12 +7,14 @@
 #include "common.h"
 #include "PanRequests.h"
 #include "Server.h"
+#include "ReceiveMessage.h"
 
 /******************全局变量******************/
 Config config;
 SharedVariable sharedVariable;
 CURL *curl;
 PanRequests requests;
+int clientSocket;
 
 /******************函数声明******************/
 RETURN_CODE initializeConfig();
@@ -50,6 +52,7 @@ RETURN_CODE initializeConfig()
     {
         config.client_id = root["client_id"].asString();
         config.client_secret = root["client_secret"].asString();
+        config.server_port= root["server_port"].asString();
         std::cerr << "配置文件加载成功" << std::endl;
         return RETURN_CODE::NO_ERROR;
     }
@@ -63,6 +66,7 @@ int main()
     ThreadPool *pool = new ThreadPool();
     pool->start(2);
     pool->submitTask(std::make_shared<Server>());
+    pool->submitTask(std::make_shared<ReceiveMessage>());
 
     getchar();
     return 0;
