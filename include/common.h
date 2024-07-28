@@ -23,6 +23,8 @@ enum class RETURN_CODE
     QR_EXPIRED,                 // 登录二维码过期
     GET_ACCESS_TOKEN_ERROR,     // 获取access_token失败
     REFRESH_ACCESS_TOKEN_ERROR, // 刷新sccess_token失败
+    MESSAGE_ENQUEUE_ERROR,      // 向消息队列中添加消息失败
+    CREATE_SERVER_SOCKET_ERROR, // 创建服务端监听socket失败
 };
 
 
@@ -33,5 +35,12 @@ typedef struct
     std::string client_secret;
     std::string server_port;
 } Config;
+
+/****************************ICD****************************/
+typedef struct
+{
+    std::string operation;
+    std::string params;
+}ClientToServer001;
 
 #endif

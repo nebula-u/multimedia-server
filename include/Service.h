@@ -1,21 +1,23 @@
-#ifndef SERVER_H
-#define SERVER_H
+#ifndef SERVICE_H
+#define SERVICE_H
 
 #include <unistd.h>
+#include "json.h"
 #include "threadpool.h"
 #include "common.h"
 #include "global.h"
 
-class Server : public Task
-{
-private:
-    
+class Service : public Task
+{    
 public:
     Any run();
 
 private:
+    void JsonParse(std::string message);
+
+private:
     bool panAuthStatus_;    // 保存云盘授权状态（true=已获得授权 false=未获得授权）
-    
+    ClientToServer001 clientToServer001_;
 };
 
-#endif  // SERVER_H
+#endif  // SERVICE_H

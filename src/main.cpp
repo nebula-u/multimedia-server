@@ -6,14 +6,17 @@
 #include "json.h"
 #include "common.h"
 #include "PanRequests.h"
-#include "Server.h"
+#include "Service.h"
 #include "ReceiveMessage.h"
+#include "messagequeue.h"
 
 /******************全局变量******************/
 Config config;
 SharedVariable sharedVariable;
 CURL *curl;
 PanRequests requests;
+MessageQueue* recvMQ;
+MessageQueue* sendMQ;
 int clientSocket;
 
 /******************函数声明******************/
@@ -64,10 +67,17 @@ int main()
 {
     initializeApp();
     ThreadPool *pool = new ThreadPool();
-    pool->start(2);
-    pool->submitTask(std::make_shared<Server>());
-    pool->submitTask(std::make_shared<ReceiveMessage>());
+    recvMQ = new MessageQueue(20);
+    sendMQ = new MessageQueue(20);
 
+    pool->start(2);
+    pool->submitTask(std::make_shared<ReceiveMessage>());
+    pool->submitTask(std::make_shared<Service>());
+
+    getchar();
+    getchar();
+    getchar();
+    getchar();
     getchar();
     return 0;
 }
