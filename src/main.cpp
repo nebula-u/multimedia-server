@@ -8,11 +8,12 @@
 #include "PanRequests.h"
 #include "Service.h"
 #include "ReceiveMessage.h"
+#include "SendMessage.h"
 #include "messagequeue.h"
 
 /******************全局变量******************/
 Config config;
-SharedVariable sharedVariable;
+SharedVariable* sharedVariable;
 CURL *curl;
 PanRequests requests;
 MessageQueue* recvMQ;
@@ -67,12 +68,14 @@ int main()
 {
     initializeApp();
     ThreadPool *pool = new ThreadPool();
+    sharedVariable = new SharedVariable();
     recvMQ = new MessageQueue(20);
     sendMQ = new MessageQueue(20);
 
-    pool->start(2);
+    pool->start(3);
     pool->submitTask(std::make_shared<ReceiveMessage>());
     pool->submitTask(std::make_shared<Service>());
+    pool->submitTask(std::make_shared<SendMessage>());
 
     getchar();
     getchar();

@@ -7,6 +7,13 @@
  * 日期：2024年7月27日
  */
 
+SharedVariable::SharedVariable()
+{
+    this->accessToken_ = "";
+    this->refreshToken_ = "";
+    this->isClientConnected_ = false;
+}
+
 std::string SharedVariable::getAccessToken()
 {
     std::lock_guard<std::mutex> lock(mtxAccessToken_);
@@ -29,4 +36,16 @@ void SharedVariable::setRefreshToken(std::string refreshToken)
 {
     std::lock_guard<std::mutex> lock(mtxRefreshToken_);
     this->refreshToken_ = refreshToken;
+}
+
+bool SharedVariable::getClientStatus()
+{
+    std::lock_guard<std::mutex> lock(mtxIsClientConnected_);
+    return this->isClientConnected_;
+}
+
+void SharedVariable::setClientStatus(bool status)
+{
+    std::lock_guard<std::mutex> lock(mtxIsClientConnected_);
+    this->isClientConnected_ = status;
 }

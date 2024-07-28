@@ -8,7 +8,7 @@
 #include "messagequeue.h"
 
 extern Config config;
-extern SharedVariable sharedVariable;
+extern SharedVariable* sharedVariable;
 extern CURL *curl;
 extern int clientSocket;
 extern MessageQueue* recvMQ;

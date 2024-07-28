@@ -259,8 +259,8 @@ RETURN_CODE PanRequests::GetAccessToken()
         token_type = root["token_type"].asString();
         if ("Bearer" == token_type)
         {
-            sharedVariable.setAccessToken(root["access_token"].asString());
-            sharedVariable.setRefreshToken(root["refresh_token"].asString());
+            sharedVariable->setAccessToken(root["access_token"].asString());
+            sharedVariable->setRefreshToken(root["refresh_token"].asString());
             return RETURN_CODE::NO_ERROR;
         }
         else
@@ -299,7 +299,7 @@ RETURN_CODE PanRequests::RefreshAccessToken()
     root["client_id"] = config.client_id;
     root["client_secret"] = config.client_secret;
     root["grant_type"] = "refresh_token";
-    root["refresh_token"] = sharedVariable.getRefreshToken();
+    root["refresh_token"] = sharedVariable->getRefreshToken();
     std::string json = sw.write(root);
     std::string token_type = "";
 
@@ -317,8 +317,8 @@ RETURN_CODE PanRequests::RefreshAccessToken()
         token_type = root["token_type"].asString();
         if ("Bearer" == token_type)
         {
-            sharedVariable.setAccessToken(root["access_token"].asString());
-            sharedVariable.setRefreshToken(root["refresh_token"].asString());
+            sharedVariable->setAccessToken(root["access_token"].asString());
+            sharedVariable->setRefreshToken(root["refresh_token"].asString());
             return RETURN_CODE::NO_ERROR;
         }
         else
@@ -343,7 +343,7 @@ RETURN_CODE PanRequests::GetUserInfo()
     std::string url = "https://openapi.alipan.com/oauth/users/info";
     std::string response = "";
     /****************HEAD LIST***************/
-    std::string headAccessToken = "Authorization: Bearer " + sharedVariable.getAccessToken();
+    std::string headAccessToken = "Authorization: Bearer " + sharedVariable->getAccessToken();
 
     std::vector<std::string> headers = {
         "Content-Type: application/json",

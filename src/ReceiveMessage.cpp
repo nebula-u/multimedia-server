@@ -10,6 +10,7 @@ Any ReceiveMessage::run()
             int failureCount = 0;
             std::cout << "等待客户端连接" << std::endl;
             clientSocket = accept(this->server_fd_, (struct sockaddr *)&(this->address_), (socklen_t *)&(this->addrlen_));
+            sharedVariable->setClientStatus(true);
             std::cout << "客户端已连接" << std::endl;
             while (true)
             {
@@ -20,7 +21,10 @@ Any ReceiveMessage::run()
                     std::cerr << "与客户端连接已断开" << std::endl;
                     failureCount++;
                     if (failureCount == 5)
+                    {
+                        sharedVariable->setClientStatus(false);
                         break;
+                    }
                     sleep(1);
                 }
                 else
