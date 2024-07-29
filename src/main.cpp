@@ -78,9 +78,5 @@ int main()
     pool->submitTask(std::make_shared<SendMessage>());
 
     getchar();
-    getchar();
-    getchar();
-    getchar();
-    getchar();
     return 0;
 }
