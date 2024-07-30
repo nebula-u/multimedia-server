@@ -41,12 +41,16 @@ typedef struct
 {
     std::string operation;
     std::string sessionId;
+    std::string uid;
+    std::string username;
+    std::string password;
 }ClientToServer001;
 
 typedef struct
 {
     std::string type;              // 状态类型
     std::string result;            // 状态类型的结果
+    std::string username;          // 用户名
     std::string newSessionid;      // 新的会话ID
 }ServerToClient001;
 

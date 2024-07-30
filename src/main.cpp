@@ -48,7 +48,7 @@ void initializeApp()
 RETURN_CODE initializeConfig()
 {
     std::ifstream fconfig;
-    fconfig.open("../private/config.json");
+    fconfig.open("../public/config.json");
     Json::Reader reader;
     Json::FastWriter writer;
     Json::Value root;

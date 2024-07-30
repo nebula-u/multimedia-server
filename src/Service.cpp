@@ -3,26 +3,34 @@
 Any Service::run()
 {
     this->panAuthStatus_ = false;
-    this->sessionWork_ = true;
-    this->sessionid_ = "12345678901234567890";
+    this->sessionWork_ = false;
+    this->sessionid_ = "";
+    this->username = "nebulau";
+    this->uid_ = "123";
+    this->password_ = "123456";
     while (true)
     {
         this->JsonParse(recvMQ->DeQueue());
-        if("get_login_status" == this->clientToServer001_.operation){
+        std::cout << this->clientToServer001_.operation << std::endl;
+        if("login-sessionid" == this->clientToServer001_.operation)
+        {
+            this->LoginSessionid();
+        }
+        else if("login-password" == this->clientToServer001_.operation)
+        {
+            this->LoginPassword();
+        }
+        else if("get_panAuth_status" == this->clientToServer001_.operation){
             this->serverToClient001_.type = "pan-auth-status";
             if(true == this->panAuthStatus_)
             {
-                // this->serverToClient001_.param = "1";
+                
             }
             else
             {
-                // this->serverToClient001_.param = "0";
+                
             }
             sendMQ->EnQueue(this->Stringify(this->serverToClient001_));
-        }
-        else if("get_session_status")
-        {
-            this->SessionStatus();
         }
         else
         {
@@ -32,23 +40,41 @@ Any Service::run()
     return 0;
 }
 
-void Service::SessionStatus()
+void Service::LoginSessionid()
 {
-    this->serverToClient001_.type = "loginStatus";  // 响应登录状态
+    this->serverToClient001_.type = "login-status";  // 响应登录状态
 
     // 会话有效，并且收到客户端的会话id与服务端的会话id一致
     if(true == this->sessionWork_ && (this->sessionid_ == this->clientToServer001_.sessionId))
     {
         // 允许客户端登录，并生成新的会话id，返回给客户端
-        this->serverToClient001_.result = "1";                      // 登录状态为1
+        this->serverToClient001_.result = "success";                // 登录状态为失败
         this->sessionid_ = this->GenerateId();
         this->serverToClient001_.newSessionid = this->sessionid_;   // 更新sessionid
-        std::cout << this->serverToClient001_.newSessionid << std::endl;
     }
     else
     {
-        this->serverToClient001_.result = "0";          // 登录状态为0
-        this->serverToClient001_.newSessionid = "";     // sessionid填为空
+        this->serverToClient001_.result = "fail";           // 登录状态为失败
+        this->serverToClient001_.newSessionid = "";         // sessionid填为空
+    }
+    sendMQ->EnQueue(this->Stringify(this->serverToClient001_));
+}
+
+void Service::LoginPassword()
+{
+    this->serverToClient001_.type = "login-status";      // 响应登陆状态
+
+    if(this->uid_ == this->clientToServer001_.uid && this->password_ == this->clientToServer001_.password){
+        this->serverToClient001_.result = "success";
+        this->serverToClient001_.username = this->username;
+        this->sessionid_ = this->GenerateId();
+        this->serverToClient001_.newSessionid = this->sessionid_;
+    }
+    else
+    {
+        this->serverToClient001_.result = "fail";           // 登录状态为失败
+        this->serverToClient001_.username = "";
+        this->serverToClient001_.newSessionid = "";         // sessionid填为空
     }
     sendMQ->EnQueue(this->Stringify(this->serverToClient001_));
 }
@@ -62,6 +88,9 @@ void Service::JsonParse(std::string message)
     {
         this->clientToServer001_.operation = root["operation"].asString();
         this->clientToServer001_.sessionId = root["sessionId"].asString();
+        this->clientToServer001_.uid = root["uid"].asString();
+        this->clientToServer001_.username = root["username"].asString();
+        this->clientToServer001_.password = root["password"].asString();
     }
     else
     {
@@ -76,6 +105,7 @@ std::string Service::Stringify(ServerToClient001 &s2c)
 
     root["type"] = s2c.type;
     root["result"] = s2c.result;
+    root["username"] = s2c.username;
     root["newSessionid"] = s2c.newSessionid;
 
     return Json::writeString(writer, root);
