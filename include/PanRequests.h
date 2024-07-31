@@ -12,7 +12,7 @@ class PanRequests
 {
 public:
 
-    RETURN_CODE GetAuthQRCodeSid();
+    std::string GetAuthQRCodeSid();
 
     RETURN_CODE GetAuthQRCode();
 

@@ -6,6 +6,7 @@
 #include "threadpool.h"
 #include "common.h"
 #include "global.h"
+#include "PanRequests.h"
 
 class Service : public Task
 {    
@@ -15,6 +16,8 @@ public:
 private:
     void LoginSessionid();
     void LoginPassword();
+    void PanAuthStatus();
+    void PanQRCodeRequest();
 
     void JsonParse(std::string message);
     std::string Stringify(ServerToClient001 &s2c);
@@ -29,6 +32,7 @@ private:
     std::string password_;
     ClientToServer001 clientToServer001_;
     ServerToClient001 serverToClient001_;
+    PanRequests* panRequests_;
 };
 
 #endif  // SERVICE_H

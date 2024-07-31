@@ -52,6 +52,7 @@ typedef struct
     std::string result;            // 状态类型的结果
     std::string username;          // 用户名
     std::string newSessionid;      // 新的会话ID
+    std::string url;
 }ServerToClient001;
 
 #endif

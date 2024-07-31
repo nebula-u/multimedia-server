@@ -78,7 +78,7 @@ bool PanRequests::Post(const std::string &url, const std::string &json,
  * 作者：Nebulau
  * 日期：2024年7月27日
  */
-RETURN_CODE PanRequests::GetAuthQRCodeSid()
+std::string PanRequests::GetAuthQRCodeSid()
 {
     /******************API******************/
     std::string url = "https://openapi.alipan.com/oauth/authorize/qrcode";
@@ -118,14 +118,13 @@ RETURN_CODE PanRequests::GetAuthQRCodeSid()
         reader.parse(response, root);
         this->sid_ = root["sid"].asString();
         this->qrCodeUrl_ = root["qrCodeUrl"].asString();
-        std::cout << response << std::endl;
-        return RETURN_CODE::NO_ERROR;
+        return this->qrCodeUrl_;
     }
     else
     {
         std::cerr << "获取登录二维码 {sid} 的请求失败" << std::endl;
     }
-    return RETURN_CODE::GET_LOGIN_QR_SID_ERROR;
+    return "";
 }
 
 /**

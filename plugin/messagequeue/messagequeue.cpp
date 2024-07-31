@@ -15,7 +15,6 @@ RETURN_CODE MessageQueue::EnQueue(std::string message)
         std::cerr << "消息队列已满，消息提交失败: " << message << std::endl;
         return RETURN_CODE::MESSAGE_ENQUEUE_ERROR;
     }
-    std::cout << "压入新消息: " << message << std::endl;
     this->messageQueue_.emplace(message);
     messageQueuesize_++;
     notEmpty_.notify_all();
