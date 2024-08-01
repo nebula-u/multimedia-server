@@ -11,6 +11,7 @@
 class BaiduPanRequests{
 public:
     std::string GetDeviceCode();
+    std::string GetAccessTokenByDeviceCode(std::string deviceCode);
 private:
     bool Get(const std::string &url, const std::string &json, 
           const std::vector<std::string>& headers, std::string &response, 

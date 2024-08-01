@@ -1,5 +1,8 @@
 {
-    "client_id": "c405b25d5e6f43d384ca6bca8544b343",    
-    "client_secret": "3b8dffc5c9d046c4a35741b016cdf2de",
+    "ali_client_id": "xxx",    
+    "ali_client_secret": "xxx",
+    "baidu_app_key": "xxx",
+    "baidu_screte_key": "xxx",
+    "baidu_sign_key": "xxx",
     "server_port": "18080"
 }

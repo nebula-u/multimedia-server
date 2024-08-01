@@ -31,8 +31,11 @@ enum class RETURN_CODE
 /*************************全局配置**************************/
 typedef struct
 {
-    std::string client_id;
-    std::string client_secret;
+    std::string ali_client_id;
+    std::string ali_client_secret;
+    std::string baidu_app_key;
+    std::string baidu_screte_key;
+    std::string baidu_sign_key;
     std::string server_port;
 } Config;
 

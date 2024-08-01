@@ -34,6 +34,11 @@ Any Service::run()
             std::cout << "获取云盘登录二维码" << std::endl;
             this->DeviceCodeRequest();
         }
+        else if("auth-login-status-resuest" == this->clientToServer001_.operation)
+        {
+            std::cout << "获取二维码登录状态" << std::endl;
+            this->GetAuthLoginStatus();
+        }
         else
         {
             std::cout << "未知的操作请求" << std::endl;
@@ -101,6 +106,7 @@ void Service::PanAuthStatus()
 void Service::DeviceCodeRequest()
 {
     std::string response = baiduPanRequests_->GetDeviceCode();
+    std::cout << response << std::endl;
     Json::Reader reader;
     Json::Value root;
     reader.parse(response, root);
@@ -113,6 +119,33 @@ void Service::DeviceCodeRequest()
     this->serverToClient001_.result = "true";
     this->serverToClient001_.url = QRCodeurl;
     sendMQ->EnQueue(this->Stringify(this->serverToClient001_));
+}
+
+void Service::GetAuthLoginStatus()
+{
+    std::string response = baiduPanRequests_->GetAccessTokenByDeviceCode(this->deviceCode_);
+    Json::Reader reader;
+    Json::Value root;
+    reader.parse(response, root);
+    std::string errorMsg = root["error"].asString();
+    std::string expires_in = root["expires_in"].asString();
+
+    this->serverToClient001_.type = "auth-login-status";
+    if(errorMsg!=""){
+        this->panAuthStatus_ = false;
+        this->serverToClient001_.result = "false";
+    }
+    if(expires_in!=""){
+        this->panAuthStatus_ = true;
+        this->accessToken_ = root["access_token"].asString();
+        this->refreshToken_ = root["refresh_token"].asString();
+        this->serverToClient001_.result = "true";
+    }
+    this->serverToClient001_.newSessionid = "";
+    this->serverToClient001_.username = "";
+    this->serverToClient001_.url = "";
+    sendMQ->EnQueue(this->Stringify(this->serverToClient001_));
+    this->PanAuthStatus();  //触发一次授权状态的反馈
 }
 
 // void Service::PanQRCodeRequest()

@@ -94,8 +94,8 @@ std::string AliPanRequests::GetAuthQRCodeSid()
      ****************************************/
     Json::Value root;
     Json::StyledWriter sw;
-    root["client_id"] = config.client_id;
-    root["client_secret"] = config.client_secret;
+    root["client_id"] = config.ali_client_id;
+    root["client_secret"] = config.ali_client_secret;
     root["scopes"].append("user:base");         // 获取你的用户ID、头像、昵称
     root["scopes"].append("file:all:read");     // 读取云盘所有文件
     root["scopes"].append("file:all:write");    // 写入云盘所有文件
@@ -236,8 +236,8 @@ RETURN_CODE AliPanRequests::GetAccessToken()
      ****************************************/
     Json::Value root;
     Json::StyledWriter sw;
-    root["client_id"] = config.client_id;
-    root["client_secret"] = config.client_secret;
+    root["client_id"] = config.ali_client_id;
+    root["client_secret"] = config.ali_client_secret;
     root["grant_type"] = "authorization_code";
     root["code"] = this->authCode_;
     std::string json = sw.write(root);
@@ -294,8 +294,8 @@ RETURN_CODE AliPanRequests::RefreshAccessToken()
      ****************************************/
     Json::Value root;
     Json::StyledWriter sw;
-    root["client_id"] = config.client_id;
-    root["client_secret"] = config.client_secret;
+    root["client_id"] = config.ali_client_id;
+    root["client_secret"] = config.ali_client_secret;
     root["grant_type"] = "refresh_token";
     root["refresh_token"] = sharedVariable->getRefreshToken();
     std::string json = sw.write(root);

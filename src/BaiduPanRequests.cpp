@@ -2,7 +2,9 @@
 
 std::string BaiduPanRequests::GetDeviceCode()
 {
-    std::string url = "https://openapi.baidu.com/oauth/2.0/device/code?response_type=device_code&client_id=应用的AppKey&scope=basic,netdisk";
+    std::string url = "https://openapi.baidu.com/oauth/2.0/device/code?response_type=device_code&client_id="
+                    + config.baidu_app_key
+                    + "&scope=basic,netdisk";
     Json::Value root;
     Json::StyledWriter sw;
     std::string json = sw.write(root);
@@ -21,6 +23,43 @@ std::string BaiduPanRequests::GetDeviceCode()
     }
 
     return "";
+}
+
+std::string BaiduPanRequests::GetAccessTokenByDeviceCode(std::string deviceCode)
+{
+    /**
+     * 
+https://openapi.baidu.com/oauth/2.0/token?grant_type=device_token&
+code=第一步生成的设备码device_code&
+client_id=您应用的AppKey&
+client_secret=您应用的SecretKey
+
+关于应用的相关信息，您可在控制台，点进去您对应的应用，查看应用详情获得。
+     */
+    std::string url = "https://openapi.baidu.com/oauth/2.0/token?grant_type=device_token&code="
+                    + deviceCode
+                    + "&client_id="
+                    + config.baidu_app_key
+                    + "&client_secret="
+                    + config.baidu_screte_key;
+    
+    std::string response = "";
+        std::vector<std::string> headers = {
+        "User-Agent: pan.baidu.com"
+    };
+
+    if (Get(url, "", headers, response, WriteTextCallback))
+    {
+        return response;
+    }
+    else
+    {
+        std::cerr << "设备码换取AccessToken的请求失败了" << std::endl;
+    }
+
+    return "";
+
+    return std::string();
 }
 
 bool BaiduPanRequests::Get(const std::string &url, const std::string &json,

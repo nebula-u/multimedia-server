@@ -48,14 +48,17 @@ void initializeApp()
 RETURN_CODE initializeConfig()
 {
     std::ifstream fconfig;
-    fconfig.open("../public/config.json");
+    fconfig.open("../private/config.json");
     Json::Reader reader;
     Json::FastWriter writer;
     Json::Value root;
     if (reader.parse(fconfig, root, false))
     {
-        config.client_id = root["client_id"].asString();
-        config.client_secret = root["client_secret"].asString();
+        config.ali_client_id = root["ali_client_id"].asString();
+        config.ali_client_secret = root["ali_client_secret"].asString();
+        config.baidu_app_key = root["baidu_app_key"].asString();
+        config.baidu_screte_key = root["baidu_screte_key"].asString();
+        config.baidu_sign_key = root["baidu_sign_key"].asString();
         config.server_port= root["server_port"].asString();
         std::cerr << "配置文件加载成功" << std::endl;
         return RETURN_CODE::NO_ERROR;

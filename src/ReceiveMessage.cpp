@@ -19,13 +19,8 @@ Any ReceiveMessage::run()
                 if (0 >= size)
                 {
                     std::cerr << "与客户端连接已断开" << std::endl;
-                    failureCount++;
-                    if (failureCount == 5)
-                    {
-                        sharedVariable->setClientStatus(false);
-                        break;
-                    }
-                    sleep(1);
+                    sharedVariable->setClientStatus(false);
+                    break;
                 }
                 else
                 {

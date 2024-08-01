@@ -19,6 +19,7 @@ private:
     void LoginPassword();
     void PanAuthStatus();
     void DeviceCodeRequest();
+    void GetAuthLoginStatus();
 
     void JsonParse(std::string message);
     std::string Stringify(ServerToClient001 &s2c);
@@ -31,11 +32,13 @@ private:
     std::string username;
     std::string uid_;
     std::string password_;
+    std::string deviceCode_;
+    std::string accessToken_;
+    std::string refreshToken_;
     ClientToServer001 clientToServer001_;
     ServerToClient001 serverToClient001_;
     AliPanRequests* aliPanRequests_;
     BaiduPanRequests* baiduPanRequests_;
-    std::string deviceCode_;
 };
 
 #endif  // SERVICE_H
