@@ -6,7 +6,8 @@
 #include "threadpool.h"
 #include "common.h"
 #include "global.h"
-#include "PanRequests.h"
+#include "AliPanRequests.h"
+#include "BaiduPanRequests.h"
 
 class Service : public Task
 {    
@@ -17,7 +18,7 @@ private:
     void LoginSessionid();
     void LoginPassword();
     void PanAuthStatus();
-    void PanQRCodeRequest();
+    void DeviceCodeRequest();
 
     void JsonParse(std::string message);
     std::string Stringify(ServerToClient001 &s2c);
@@ -32,7 +33,9 @@ private:
     std::string password_;
     ClientToServer001 clientToServer001_;
     ServerToClient001 serverToClient001_;
-    PanRequests* panRequests_;
+    AliPanRequests* aliPanRequests_;
+    BaiduPanRequests* baiduPanRequests_;
+    std::string deviceCode_;
 };
 
 #endif  // SERVICE_H

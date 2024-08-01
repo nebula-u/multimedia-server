@@ -8,7 +8,9 @@ Any Service::run()
     this->username = "nebulau";
     this->uid_ = "123";
     this->password_ = "123456";
-    this->panRequests_ = new PanRequests();
+    this->aliPanRequests_ = new AliPanRequests();
+    this->baiduPanRequests_ = new BaiduPanRequests();
+    this->deviceCode_ = "";
     while (true)
     {
         this->JsonParse(recvMQ->DeQueue());
@@ -30,7 +32,7 @@ Any Service::run()
         else if ("auth-qrcode-request" == this->clientToServer001_.operation)
         {
             std::cout << "获取云盘登录二维码" << std::endl;
-            this->PanQRCodeRequest();
+            this->DeviceCodeRequest();
         }
         else
         {
@@ -96,25 +98,42 @@ void Service::PanAuthStatus()
     sendMQ->EnQueue(this->Stringify(this->serverToClient001_));
 }
 
-void Service::PanQRCodeRequest()
+void Service::DeviceCodeRequest()
 {
-    std::string QRCodeurl = this->panRequests_->GetAuthQRCodeSid();
+    std::string response = baiduPanRequests_->GetDeviceCode();
+    Json::Reader reader;
+    Json::Value root;
+    reader.parse(response, root);
+    std::string QRCodeurl = root["qrcode_url"].asString();
+    this->deviceCode_ = root["device_code"].asString();
+
     this->serverToClient001_.newSessionid = "";
     this->serverToClient001_.username = "";
     this->serverToClient001_.type = "QRCode-url";
-    if("" != QRCodeurl)
-    {
-        this->serverToClient001_.result = "true";
-        this->serverToClient001_.url = QRCodeurl;
-    }
-    else
-    {
-        this->serverToClient001_.result = "false";
-        this->serverToClient001_.url = "";
-        std::cout << "QRCode地址请求失败" << std::endl;
-    }
+    this->serverToClient001_.result = "true";
+    this->serverToClient001_.url = QRCodeurl;
     sendMQ->EnQueue(this->Stringify(this->serverToClient001_));
 }
+
+// void Service::PanQRCodeRequest()
+// {
+//     std::string QRCodeurl = this->aliPanRequests_->GetAuthQRCodeSid();
+//     this->serverToClient001_.newSessionid = "";
+//     this->serverToClient001_.username = "";
+//     this->serverToClient001_.type = "QRCode-url";
+//     if("" != QRCodeurl)
+//     {
+//         this->serverToClient001_.result = "true";
+//         this->serverToClient001_.url = QRCodeurl;
+//     }
+//     else
+//     {
+//         this->serverToClient001_.result = "false";
+//         this->serverToClient001_.url = "";
+//         std::cout << "QRCode地址请求失败" << std::endl;
+//     }
+//     sendMQ->EnQueue(this->Stringify(this->serverToClient001_));
+// }
 
 void Service::JsonParse(std::string message)
 {

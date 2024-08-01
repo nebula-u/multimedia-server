@@ -5,7 +5,6 @@
 #include "threadpool.h"
 #include "json.h"
 #include "common.h"
-#include "PanRequests.h"
 #include "Service.h"
 #include "ReceiveMessage.h"
 #include "SendMessage.h"
@@ -15,10 +14,11 @@
 Config config;
 SharedVariable* sharedVariable;
 CURL *curl;
-PanRequests requests;
 MessageQueue* recvMQ;
 MessageQueue* sendMQ;
 int clientSocket;
+std::mutex mtxRequest;
+
 
 /******************函数声明******************/
 RETURN_CODE initializeConfig();

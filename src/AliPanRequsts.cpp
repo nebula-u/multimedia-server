@@ -1,13 +1,11 @@
-#include "PanRequests.h"
-
-std::mutex mtxRequest;
+#include "AliPanRequests.h"
 
 /**
  * 功能：朴素的HTTP Get函数，需要指定url、json、head、response、回调函数、文件名（响应为二进制数据时填写），仅限类内部使用
  * 作者：Nebulau
  * 日期：2024年7月27日
  */
-bool PanRequests::Get(const std::string &url, const std::string &json, 
+bool AliPanRequests::Get(const std::string &url, const std::string &json, 
           const std::vector<std::string>& headers, std::string &response, 
           size_t (*callback)(void*, size_t, size_t, void*), const std::string& fileName)
 {
@@ -48,7 +46,7 @@ bool PanRequests::Get(const std::string &url, const std::string &json,
  * 作者：Nebulau
  * 日期：2024年7月27日
  */
-bool PanRequests::Post(const std::string &url, const std::string &json, 
+bool AliPanRequests::Post(const std::string &url, const std::string &json, 
           const std::vector<std::string>& headers, std::string &response, 
           size_t (*callback)(void*, size_t, size_t, void*))
 {
@@ -78,7 +76,7 @@ bool PanRequests::Post(const std::string &url, const std::string &json,
  * 作者：Nebulau
  * 日期：2024年7月27日
  */
-std::string PanRequests::GetAuthQRCodeSid()
+std::string AliPanRequests::GetAuthQRCodeSid()
 {
     /******************API******************/
     std::string url = "https://openapi.alipan.com/oauth/authorize/qrcode";
@@ -107,7 +105,8 @@ std::string PanRequests::GetAuthQRCodeSid()
     std::string json = sw.write(root);
     /****************HEAD LIST***************/
     std::vector<std::string> headers = {
-        "Content-Type: application/json"};
+        "Content-Type: application/json"
+    };
 
     /******************响应******************/
     std::string response = "";
@@ -132,7 +131,7 @@ std::string PanRequests::GetAuthQRCodeSid()
  * 作者：Nebulau
  * 日期：2024年7月27日
  */
-RETURN_CODE PanRequests::GetAuthQRCode()
+RETURN_CODE AliPanRequests::GetAuthQRCode()
 {
     /******************API******************/
     std::string url = this->qrCodeUrl_;
@@ -162,7 +161,7 @@ RETURN_CODE PanRequests::GetAuthQRCode()
  * 作者：Nebulau
  * 日期：2024年7月27日
  */
-RETURN_CODE PanRequests::WaitForLogin()
+RETURN_CODE AliPanRequests::WaitForLogin()
 {
     std::string url = "https://openapi.alipan.com/oauth/qrcode/" + this->sid_ + "/status";
     std::string response = "";
@@ -222,7 +221,7 @@ RETURN_CODE PanRequests::WaitForLogin()
  * 更改历史：
  *      - 2024年7月26日：调用Post方法，获取access_token，将access_token保存进类成员access_token_中
  */
-RETURN_CODE PanRequests::GetAccessToken()
+RETURN_CODE AliPanRequests::GetAccessToken()
 {
     /******************API******************/
     std::string url = "https://openapi.alipan.com/oauth/access_token";
@@ -280,7 +279,7 @@ RETURN_CODE PanRequests::GetAccessToken()
  * 作者：Nebulau
  * 日期：2024年7月27日
  */
-RETURN_CODE PanRequests::RefreshAccessToken()
+RETURN_CODE AliPanRequests::RefreshAccessToken()
 {
     /******************API******************/
     std::string url = "https://openapi.alipan.com/oauth/access_token";
@@ -337,7 +336,7 @@ RETURN_CODE PanRequests::RefreshAccessToken()
  * 作者：Nebualu
  * 日期：2024年7月27日
  */
-RETURN_CODE PanRequests::GetUserInfo()
+RETURN_CODE AliPanRequests::GetUserInfo()
 {
     std::string url = "https://openapi.alipan.com/oauth/users/info";
     std::string response = "";
