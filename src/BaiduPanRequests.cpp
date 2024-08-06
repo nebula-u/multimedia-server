@@ -27,15 +27,6 @@ std::string BaiduPanRequests::GetDeviceCode()
 
 std::string BaiduPanRequests::GetAccessTokenByDeviceCode(std::string deviceCode)
 {
-    /**
-     * 
-https://openapi.baidu.com/oauth/2.0/token?grant_type=device_token&
-code=第一步生成的设备码device_code&
-client_id=您应用的AppKey&
-client_secret=您应用的SecretKey
-
-关于应用的相关信息，您可在控制台，点进去您对应的应用，查看应用详情获得。
-     */
     std::string url = "https://openapi.baidu.com/oauth/2.0/token?grant_type=device_token&code="
                     + deviceCode
                     + "&client_id="
@@ -44,7 +35,7 @@ client_secret=您应用的SecretKey
                     + config.baidu_screte_key;
     
     std::string response = "";
-        std::vector<std::string> headers = {
+    std::vector<std::string> headers = {
         "User-Agent: pan.baidu.com"
     };
 
@@ -58,8 +49,31 @@ client_secret=您应用的SecretKey
     }
 
     return "";
+}
 
-    return std::string();
+std::string BaiduPanRequests::GetFileList(std::string path, std::string accessToken)
+{
+    std::string url = "https://pan.baidu.com/rest/2.0/xpan/file?method=list&dir="
+                    + path
+                    + "&order=name&start=0&limit=100&web=web&folder=0&access_token="
+                    + accessToken
+                    + "&desc=1";
+    std::string response = "";
+    std::vector<std::string> headers = {
+        "User-Agent: pan.baidu.com"
+    };
+
+    if (Get(url, "", headers, response, WriteTextCallback))
+    {
+        std::cout << response << std::endl;
+        return response;
+    }
+    else
+    {
+        std::cerr << "获取文件列表的请求失败了" << std::endl;
+    }
+
+    return "";
 }
 
 bool BaiduPanRequests::Get(const std::string &url, const std::string &json,

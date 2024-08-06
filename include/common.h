@@ -55,7 +55,14 @@ typedef struct
     std::string result;            // 状态类型的结果
     std::string username;          // 用户名
     std::string newSessionid;      // 新的会话ID
-    std::string url;
+    std::string url;               // 链接
+    std::vector<std::vector<std::string>> fileList;     // 0、文件名
+                                                        // 1、是否是文件夹
+                                                        // 2、大小
+                                                        // 3、路径
+                                                        // 4、缩略图
+                                                        // 5、修改时间
+                                                        // 6、文件类型（1 视频、2 音频、3 图片、4 文档、5 应用、6 其他、7 种子）
 }ServerToClient001;
 
 #endif
