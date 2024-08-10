@@ -170,7 +170,6 @@ void Service::GetFileList()
 {
     std::string requestPath = this->clientToServer001_.path;
     this->serverToClient001_.fileList.resize(0);
-    std::cout << "@@@@@@@@@@@@@@@@: " << requestPath << std::endl;
     std::string response = baiduPanRequests_->GetFileList(requestPath, this->accessToken_);
     Json::Reader reader;
     Json::Value root;
@@ -189,6 +188,7 @@ void Service::GetFileList()
             item.push_back(root["list"][i]["thumbs"]["url2"].asString());
             item.push_back(root["list"][i]["server_mtime"].asString());
             item.push_back(root["list"][i]["category"].asString());
+            item.push_back(root["list"][i]["fs_id"].asString());
             this->serverToClient001_.fileList.push_back(item);
         }
         this->serverToClient001_.result = "true";
@@ -251,6 +251,7 @@ std::string Service::Stringify(ServerToClient001 &s2c)
         fileList["thumbs"] = s2c.fileList[i][4];
         fileList["mtime"] = s2c.fileList[i][5];
         fileList["category"] = s2c.fileList[i][6];
+        fileList["fid"] = s2c.fileList[i][7];
         root["filelist"].append(fileList);
     }
     return Json::writeString(writer, root);
