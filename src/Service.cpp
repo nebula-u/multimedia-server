@@ -71,6 +71,7 @@ void Service::LoginSessionid()
         this->serverToClient001_.newSessionid = ""; // sessionid填为空
     }
     sendMQ->EnQueue(this->Stringify(this->serverToClient001_));
+    this->StatusClear();
     this->PanAuthStatus();  //触发一次授权状态的反馈
 }
 
@@ -93,6 +94,7 @@ void Service::LoginPassword()
         this->serverToClient001_.newSessionid = ""; // sessionid填为空
     }
     sendMQ->EnQueue(this->Stringify(this->serverToClient001_));
+    this->StatusClear();
     this->PanAuthStatus();  //触发一次授权状态的反馈
 }
 
@@ -108,6 +110,7 @@ void Service::PanAuthStatus()
         this->serverToClient001_.result = "false";
     }
     sendMQ->EnQueue(this->Stringify(this->serverToClient001_));
+    this->StatusClear();
 }
 
 void Service::DeviceCodeRequest()
@@ -126,6 +129,7 @@ void Service::DeviceCodeRequest()
     this->serverToClient001_.result = "true";
     this->serverToClient001_.url = QRCodeurl;
     sendMQ->EnQueue(this->Stringify(this->serverToClient001_));
+    this->StatusClear();
 }
 
 /**
@@ -155,6 +159,7 @@ void Service::GetAuthLoginStatus()
     this->serverToClient001_.username = "";
     this->serverToClient001_.url = "";
     sendMQ->EnQueue(this->Stringify(this->serverToClient001_));
+    this->StatusClear();
     this->PanAuthStatus();  //触发一次授权状态的反馈
 }
 
@@ -163,8 +168,10 @@ void Service::GetAuthLoginStatus()
  */
 void Service::GetFileList()
 {
+    std::string requestPath = this->clientToServer001_.path;
     this->serverToClient001_.fileList.resize(0);
-    std::string response = baiduPanRequests_->GetFileList("/", this->accessToken_);
+    std::cout << "@@@@@@@@@@@@@@@@: " << requestPath << std::endl;
+    std::string response = baiduPanRequests_->GetFileList(requestPath, this->accessToken_);
     Json::Reader reader;
     Json::Value root;
     reader.parse(response, root);
@@ -191,6 +198,17 @@ void Service::GetFileList()
         this->serverToClient001_.result = "false";
     }
     sendMQ->EnQueue(this->Stringify(this->serverToClient001_));
+    this->StatusClear();
+}
+
+void Service::StatusClear()
+{
+    this->serverToClient001_.type = "";
+    this->serverToClient001_.result = "";
+    this->serverToClient001_.username = "";
+    this->serverToClient001_.newSessionid = "";
+    this->serverToClient001_.url = "";
+    this->serverToClient001_.fileList.resize(0);
 }
 
 void Service::JsonParse(std::string message)
@@ -205,6 +223,7 @@ void Service::JsonParse(std::string message)
         this->clientToServer001_.uid = root["uid"].asString();
         this->clientToServer001_.username = root["username"].asString();
         this->clientToServer001_.password = root["password"].asString();
+        this->clientToServer001_.path = root["path"].asString();
     }
     else
     {

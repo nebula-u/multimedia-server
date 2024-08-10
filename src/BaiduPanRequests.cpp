@@ -53,6 +53,8 @@ std::string BaiduPanRequests::GetAccessTokenByDeviceCode(std::string deviceCode)
 
 std::string BaiduPanRequests::GetFileList(std::string path, std::string accessToken)
 {
+    path = UrlEncode(path);
+    // path = "%2F05%E5%9B%BE%E7%89%87%2F%E6%97%85%E6%B8%B8%E7%85%A7%E7%89%87%2F%E7%94%98%E5%8D%97%E6%97%85%E6%B8%B8%2F2023.6.22-6.24%E7%94%98%E5%8D%97%E4%B8%89%E6%97%A5%E6%97%85%E6%B8%B8%2F6.23%20%E6%89%8E%E5%B0%95%E9%82%A3";
     std::string url = "https://pan.baidu.com/rest/2.0/xpan/file?method=list&dir="
                     + path
                     + "&order=name&start=0&limit=100&web=web&folder=0&access_token="
@@ -62,6 +64,8 @@ std::string BaiduPanRequests::GetFileList(std::string path, std::string accessTo
     std::vector<std::string> headers = {
         "User-Agent: pan.baidu.com"
     };
+
+    std::cout << "###############: " << url << std::endl;
 
     if (Get(url, "", headers, response, WriteTextCallback))
     {

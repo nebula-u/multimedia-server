@@ -22,6 +22,7 @@ private:
     void GetAuthLoginStatus();
     void GetFileList();
 
+    void StatusClear();
     void JsonParse(std::string message);
     std::string Stringify(ServerToClient001 &s2c);
     std::string GenerateId();

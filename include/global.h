@@ -19,4 +19,7 @@ extern std::mutex mtxRequest;
 size_t WriteTextCallback(void *contents, size_t size, size_t nmemb, void *userp);
 size_t WriteBinaryCallback(void* contents, size_t size, size_t nmemb, void* userp);
 
+/***************************************** 工具函数 *****************************************/
+std::string UrlEncode(const std::string& str);
+
 #endif

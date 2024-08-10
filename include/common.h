@@ -47,6 +47,7 @@ typedef struct
     std::string uid;
     std::string username;
     std::string password;
+    std::string path;
 }ClientToServer001;
 
 typedef struct
