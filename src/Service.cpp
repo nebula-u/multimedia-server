@@ -34,15 +34,20 @@ Any Service::run()
             std::cout << "获取云盘登录二维码" << std::endl;
             this->DeviceCodeRequest();
         }
-        else if("auth-login-status-resuest" == this->clientToServer001_.operation)
+        else if ("auth-login-status-resuest" == this->clientToServer001_.operation)
         {
             std::cout << "获取二维码登录状态" << std::endl;
             this->GetAuthLoginStatus();
         }
-        else if("get-file-list" == this->clientToServer001_.operation)
+        else if ("get-file-list" == this->clientToServer001_.operation)
         {
             std::cout << "获取文件列表" << std::endl;
             this->GetFileList();
+        }
+        else if ("get-file-dlink" == this->clientToServer001_.operation)
+        {
+            std::cout << "获取下载链接" << std::endl;
+            this->GetDlink();
         }
         else
         {
@@ -72,7 +77,7 @@ void Service::LoginSessionid()
     }
     sendMQ->EnQueue(this->Stringify(this->serverToClient001_));
     this->StatusClear();
-    this->PanAuthStatus();  //触发一次授权状态的反馈
+    this->PanAuthStatus(); // 触发一次授权状态的反馈
 }
 
 void Service::LoginPassword()
@@ -95,7 +100,7 @@ void Service::LoginPassword()
     }
     sendMQ->EnQueue(this->Stringify(this->serverToClient001_));
     this->StatusClear();
-    this->PanAuthStatus();  //触发一次授权状态的反馈
+    this->PanAuthStatus(); // 触发一次授权状态的反馈
 }
 
 void Service::PanAuthStatus()
@@ -145,11 +150,13 @@ void Service::GetAuthLoginStatus()
     std::string expires_in = root["expires_in"].asString();
 
     this->serverToClient001_.type = "auth-login-status";
-    if(errorMsg!=""){
+    if (errorMsg != "")
+    {
         this->panAuthStatus_ = false;
         this->serverToClient001_.result = "false";
     }
-    if(expires_in!=""){
+    if (expires_in != "")
+    {
         this->panAuthStatus_ = true;
         this->accessToken_ = root["access_token"].asString();
         this->refreshToken_ = root["refresh_token"].asString();
@@ -160,7 +167,7 @@ void Service::GetAuthLoginStatus()
     this->serverToClient001_.url = "";
     sendMQ->EnQueue(this->Stringify(this->serverToClient001_));
     this->StatusClear();
-    this->PanAuthStatus();  //触发一次授权状态的反馈
+    this->PanAuthStatus(); // 触发一次授权状态的反馈
 }
 
 /**
@@ -178,8 +185,10 @@ void Service::GetFileList()
     this->serverToClient001_.type = "file-list";
 
     std::string errorno = root["errno"].asString();
-    if(errorno == "0"){
-        for(int i = 0; i < root["list"].size(); i++){
+    if (errorno == "0")
+    {
+        for (int i = 0; i < root["list"].size(); i++)
+        {
             std::vector<std::string> item;
             item.push_back(root["list"][i]["server_filename"].asString());
             item.push_back(root["list"][i]["isdir"].asString());
@@ -201,6 +210,32 @@ void Service::GetFileList()
     this->StatusClear();
 }
 
+/**
+ * 获取下载链接
+ */
+void Service::GetDlink()
+{
+    std::vector<std::string> fids;
+    fids.push_back(this->clientToServer001_.fid);
+    std::string response = baiduPanRequests_->QueryFileInfo(fids, this->accessToken_, true);
+    Json::Reader reader;
+    Json::Value root;
+    reader.parse(response, root);
+
+    this->serverToClient001_.type = "dlink-list";
+
+    for (int i = 0; i < root["list"].size(); i++)
+    {
+        std::vector<std::string> item;
+        item.push_back(root["list"][i]["filename"].asString());
+        item.push_back(root["list"][i]["dlink"].asString()+"&access_token="+this->accessToken_);
+        this->serverToClient001_.dlinklist.push_back(item);
+    }
+    this->serverToClient001_.result = "true";
+    sendMQ->EnQueue(this->Stringify(this->serverToClient001_));
+    this->StatusClear();
+}
+
 void Service::StatusClear()
 {
     this->serverToClient001_.type = "";
@@ -209,6 +244,7 @@ void Service::StatusClear()
     this->serverToClient001_.newSessionid = "";
     this->serverToClient001_.url = "";
     this->serverToClient001_.fileList.resize(0);
+    this->serverToClient001_.dlinklist.resize(0);
 }
 
 void Service::JsonParse(std::string message)
@@ -224,6 +260,7 @@ void Service::JsonParse(std::string message)
         this->clientToServer001_.username = root["username"].asString();
         this->clientToServer001_.password = root["password"].asString();
         this->clientToServer001_.path = root["path"].asString();
+        this->clientToServer001_.fid = root["fid"].asString();
     }
     else
     {
@@ -234,7 +271,8 @@ void Service::JsonParse(std::string message)
 std::string Service::Stringify(ServerToClient001 &s2c)
 {
     Json::Value root;
-    Json::Value fileList;;
+    Json::Value fileList;
+    Json::Value dlinkList;;
     Json::StreamWriterBuilder writer;
 
     root["type"] = s2c.type;
@@ -243,7 +281,8 @@ std::string Service::Stringify(ServerToClient001 &s2c)
     root["newSessionid"] = s2c.newSessionid;
     root["url"] = s2c.url;
 
-    for(int i = 0; i < s2c.fileList.size(); i++){
+    for (int i = 0; i < s2c.fileList.size(); i++)
+    {
         fileList["filename"] = s2c.fileList[i][0];
         fileList["isdir"] = s2c.fileList[i][1];
         fileList["size"] = s2c.fileList[i][2];
@@ -253,6 +292,13 @@ std::string Service::Stringify(ServerToClient001 &s2c)
         fileList["category"] = s2c.fileList[i][6];
         fileList["fid"] = s2c.fileList[i][7];
         root["filelist"].append(fileList);
+    }
+
+    for (int i = 0; i < s2c.dlinklist.size(); i++)
+    {
+        dlinkList["filename"] = s2c.dlinklist[i][0];
+        dlinkList["dlink"] = s2c.dlinklist[i][1];
+        root["dlinkList"].append(dlinkList);
     }
     return Json::writeString(writer, root);
 }

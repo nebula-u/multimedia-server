@@ -21,6 +21,7 @@ private:
     void DeviceCodeRequest();
     void GetAuthLoginStatus();
     void GetFileList();
+    void GetDlink();
 
     void StatusClear();
     void JsonParse(std::string message);

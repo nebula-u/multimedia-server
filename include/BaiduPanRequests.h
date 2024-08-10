@@ -13,6 +13,7 @@ public:
     std::string GetDeviceCode();
     std::string GetAccessTokenByDeviceCode(std::string deviceCode);
     std::string GetFileList(std::string path, std::string accessToken);
+    std::string QueryFileInfo(std::vector<std::string> fids, std::string accessToken, bool dlink);
 private:
     bool Get(const std::string &url, const std::string &json, 
           const std::vector<std::string>& headers, std::string &response, 

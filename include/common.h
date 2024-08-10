@@ -48,6 +48,7 @@ typedef struct
     std::string username;
     std::string password;
     std::string path;
+    std::string fid;
 }ClientToServer001;
 
 typedef struct
@@ -65,6 +66,8 @@ typedef struct
                                                         // 5、修改时间
                                                         // 6、文件类型（1 视频、2 音频、3 图片、4 文档、5 应用、6 其他、7 种子）
                                                         // 7、fid
+    std::vector<std::vector<std::string>> dlinklist;    // 0、文件名
+                                                        // 1、dlink
 }ServerToClient001;
 
 #endif
