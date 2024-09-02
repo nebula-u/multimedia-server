@@ -4,11 +4,11 @@ Any SendMessage::run()
 {
     while (true)
     {
-        std::string message = sendMQ->DeQueue();
+        std::string message = sendMQ->DeQueue() + "#end";
         if (true == sharedVariable->getClientStatus())
         {
-            SendMessageSize(message.size());
-            std::cout << "发送的字节数：" << message.size() << std::endl;
+            std::cout << "\n\n------------------------------------" << std::endl;
+            std::cout << message << std::endl;
             send(clientSocket, message.c_str(), message.size(), 0);
         }
         else
@@ -19,10 +19,4 @@ Any SendMessage::run()
     }
 
     return 0;
-}
-
-void SendMessage::SendMessageSize(size_t length)
-{
-    send(clientSocket, &length, sizeof(length), 0);
-    usleep(50000);
 }

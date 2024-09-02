@@ -52,7 +52,6 @@ std::string BaiduPanRequests::GetFileList(std::string path, std::string accessTo
 
     if (Get(url, "", headers, response, WriteTextCallback))
     {
-        std::cout << response << std::endl;
         return response;
     }
     else

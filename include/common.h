@@ -68,6 +68,7 @@ typedef struct
                                                         // 7、fid
     std::vector<std::vector<std::string>> dlinklist;    // 0、文件名
                                                         // 1、dlink
+                                                        // 2、文件大小
 }ServerToClient001;
 
 #endif

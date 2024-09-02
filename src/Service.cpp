@@ -66,6 +66,7 @@ void Service::LoginSessionid()
     {
         // 允许客户端登录，并生成新的会话id，返回给客户端
         this->serverToClient001_.result = "success"; // 登录状态为失败
+        this->serverToClient001_.username = this->username;
         this->sessionid_ = this->GenerateId();
         this->sessionWork_ = true;
         this->serverToClient001_.newSessionid = this->sessionid_; // 更新sessionid
@@ -229,6 +230,7 @@ void Service::GetDlink()
         std::vector<std::string> item;
         item.push_back(root["list"][i]["filename"].asString());
         item.push_back(root["list"][i]["dlink"].asString()+"&access_token="+this->accessToken_);
+        item.push_back(root["list"][i]["size"].asString());
         this->serverToClient001_.dlinklist.push_back(item);
     }
     this->serverToClient001_.result = "true";
@@ -298,6 +300,7 @@ std::string Service::Stringify(ServerToClient001 &s2c)
     {
         dlinkList["filename"] = s2c.dlinklist[i][0];
         dlinkList["dlink"] = s2c.dlinklist[i][1];
+        dlinkList["size"] = s2c.dlinklist[i][2];
         root["dlinkList"].append(dlinkList);
     }
     return Json::writeString(writer, root);

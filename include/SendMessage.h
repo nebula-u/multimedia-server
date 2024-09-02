@@ -9,7 +9,6 @@ class SendMessage : public Task
 {
 public:
     Any run();
-    void SendMessageSize(size_t length);
 private:
 };
 
