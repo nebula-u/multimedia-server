@@ -72,14 +72,11 @@ std::string BaiduPanRequests::QueryFileInfo(std::vector<std::string> fids, std::
     fs = fs + fids[fids.size()-1] + "]";
     std::string url = "http://pan.baidu.com/rest/2.0/xpan/multimedia?method=filemetas&access_token=" + accessToken + "&fsids=" + fs + "&dlink=1";
 
-    std::cout << "MMMM: " << url << std::endl;
-
     std::string response = "";
     std::vector<std::string> headers = {
         "User-Agent: pan.baidu.com"};
         if (Get(url, "", headers, response, WriteTextCallback))
     {
-        std::cout << response << std::endl;
         return response;
     }
     else

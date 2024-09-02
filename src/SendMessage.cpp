@@ -7,8 +7,6 @@ Any SendMessage::run()
         std::string message = sendMQ->DeQueue() + "#end";
         if (true == sharedVariable->getClientStatus())
         {
-            std::cout << "\n\n------------------------------------" << std::endl;
-            std::cout << message << std::endl;
             send(clientSocket, message.c_str(), message.size(), 0);
         }
         else

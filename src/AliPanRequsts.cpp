@@ -263,7 +263,6 @@ RETURN_CODE AliPanRequests::GetAccessToken()
         }
         else
         {
-            std::cout << response << std::endl;
             std::cerr << "GetAccessToken Error: " << token_type << std::endl;
         }
     }
@@ -351,7 +350,6 @@ RETURN_CODE AliPanRequests::GetUserInfo()
     std::string json = "";
     if(Get(url, json, headers, response, WriteTextCallback))
     {
-        std::cout << response << std::endl;
         return RETURN_CODE::NO_ERROR;
     }
     else

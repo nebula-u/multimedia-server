@@ -122,7 +122,6 @@ void Service::PanAuthStatus()
 void Service::DeviceCodeRequest()
 {
     std::string response = baiduPanRequests_->GetDeviceCode();
-    std::cout << response << std::endl;
     Json::Reader reader;
     Json::Value root;
     reader.parse(response, root);
